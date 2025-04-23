@@ -5,6 +5,8 @@ import { UserButton } from "@clerk/nextjs";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { SignInButton } from "@clerk/nextjs";
+import { canAccessAdminPages } from "@/app/permissions/general";
+import { getCurrentUser } from "@/app/services/clerk";
 
 export default function ConsumerLayout({
   children,
@@ -29,12 +31,7 @@ function Navbar() {
         </Link>
         <Suspense fallback={<div>Loading...</div>}>
           <SignedIn>
-            <Link
-              className="hover:bg-accent/10 flex items-center px-2"
-              href="/Admin"
-            >
-              Admin
-            </Link>
+            <AdminLink />
             <Link
               className="hover:bg-accent/10 flex items-center px-2"
               href="/courses"
@@ -67,5 +64,15 @@ function Navbar() {
         </Suspense>
       </nav>
     </header>
+  );
+}
+
+async function AdminLink() {
+  const user = await getCurrentUser();
+  if (!canAccessAdminPages(user)) return null;
+  return (
+    <Link className="hover:bg-accent/10 flex items-center px-2" href="/Admin">
+      Admin
+    </Link>
   );
 }
